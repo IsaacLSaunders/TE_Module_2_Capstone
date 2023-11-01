@@ -55,7 +55,7 @@ namespace TEBucksServer.Controllers
             return result;
         }
 
-        [HttpPost("register")]
+        [HttpPost("/register")]
         public IActionResult Register(LoginUser userParam)
         {
             // Default generic error message
