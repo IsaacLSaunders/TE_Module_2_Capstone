@@ -13,12 +13,16 @@ namespace TEBucksServer.Controllers
         private readonly ITokenGenerator tokenGenerator;
         private readonly IPasswordHasher passwordHasher;
         private readonly IUserDao userDao;
+        private readonly IPersonDao personDao;
+        private readonly IAccountDao accountDao;
 
-        public LoginController(ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IUserDao userDao)
+        public LoginController(ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IUserDao userDao, IPersonDao personDao, IAccountDao accountDao)
         {
             this.tokenGenerator = tokenGenerator;
             this.passwordHasher = passwordHasher;
             this.userDao = userDao;
+            this.personDao = personDao;
+            this.accountDao = accountDao;
         }
 
         [HttpPost]
@@ -79,9 +83,13 @@ namespace TEBucksServer.Controllers
 
             // create new user
             User newUser;
+            Person newPerson;
+            Account newAccount;
             try
             {
                 newUser = userDao.CreateUser(userParam.Username, userParam.Password);
+                newPerson = personDao.CreatePerson(userParam.FirstName, userParam.LastName, newUser.UserId);
+                newAccount = accountDao.CreateAccount(newPerson.Id);
             }
             catch (DaoException)
             {
