@@ -49,7 +49,10 @@ namespace TEBucksServer.DAO
         public Account GetAccountById(int newId)
         {
             Account newAccount = null;
-            string sql = "select AccountId,PersonId,Balance from accounts where AccountId = @accountId";
+            string sql = "select AccountId,PersonId,Balance from accounts " +
+                "JOIN Persons ON Persons.Id = Accounts.PersonId " +
+                "JOIN users ON Persons.LoginId = users.user_id " +
+                "where users.user_id = @userId;";
 
             try
             {
@@ -58,7 +61,7 @@ namespace TEBucksServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(sql,conn);
-                    cmd.Parameters.AddWithValue("@accountId", newId);
+                    cmd.Parameters.AddWithValue("@userId", newId);
 
                     SqlDataReader reader = cmd.ExecuteReader();
                     if (reader.Read())
@@ -76,6 +79,7 @@ namespace TEBucksServer.DAO
             }
             return newAccount;
         }
+
 
         private Account MapRowToAccount(SqlDataReader reader)
         {

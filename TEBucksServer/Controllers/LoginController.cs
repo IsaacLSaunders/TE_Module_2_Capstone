@@ -50,7 +50,7 @@ namespace TEBucksServer.Controllers
                 string token = tokenGenerator.GenerateToken(user.UserId, user.Username);
 
                 // Create a ReturnUser object to return to the client
-                ReturnUser retUser = new ReturnUser() { UserId = user.UserId, Username = user.Username, Token = token };
+                ReturnUser retUser = new ReturnUser() { User = user, Token = token };
 
                 // Switch to 200 OK
                 result = Ok(retUser);
@@ -99,7 +99,7 @@ namespace TEBucksServer.Controllers
             if (newUser != null)
             {
                 // Create a ReturnUser object to return to the client
-                ReturnUser returnUser = new ReturnUser() { UserId = newUser.UserId, Username = newUser.Username };
+                ReturnUser returnUser = new ReturnUser() { User = newUser };
 
                 result = Created("/login", returnUser);
             }

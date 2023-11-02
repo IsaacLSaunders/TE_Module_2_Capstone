@@ -177,12 +177,14 @@ namespace TEBucksServer.DAO
 
         }
 
-        public List<Transfer> GetTransfersByPersonId(int personId)
+        public List<Transfer> GetTransfersByPersonId(int userId)
         {
             List<Transfer> output = new List<Transfer>();
-            string sql = "Select TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount " +
-                "From Transfers Join Persons As FromId On Transfers.UserFromId = FromId.Id Join Persons " +
-                "As ToId On Transfers.UserToId = ToId.Id Where FromId.Id = @personId Or ToId.Id = @personId;";
+            string sql = "Select TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount From Transfers " +
+                "WHERE UserFromId = " +
+                "(Select persons.Id FROM Persons JOIN users ON persons.LoginId = users.user_id WHERE user_id = @userId) " +
+                "OR UserToId = " +
+                "(Select persons.Id FROM Persons JOIN users ON persons.LoginId = users.user_id WHERE user_id = @userId);";
 
             try
             {
@@ -190,7 +192,7 @@ namespace TEBucksServer.DAO
                 {
                     conn.Open();
                     SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@personId",personId);
+                    cmd.Parameters.AddWithValue("@userId", userId);
 
                     SqlDataReader reader = cmd.ExecuteReader();
                     while (reader.Read())
