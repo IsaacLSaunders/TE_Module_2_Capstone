@@ -22,7 +22,7 @@ namespace TEBucksServer.DAO
         {
             Transfer output = null;
             string sql = "Insert Into Transfers (UserFromId, UserToId, TransferType, TransferStatus, Amount) " +
-                "OUTPUT Inserted.TansferId " +
+                "OUTPUT Inserted.TransferId " +
                 "Values (@userFrom, @userTo, @type, @status, @amount)";
             int newId = 0;
 
