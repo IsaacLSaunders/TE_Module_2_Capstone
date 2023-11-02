@@ -55,22 +55,94 @@ namespace TEBucksServer.DAO
 
         public Transfer EditTransferStatus(Transfer incoming)
         {
-            throw new System.NotImplementedException();
-        }
+            Transfer output = null;
+            string sql = "Update Transfers Set TranferStatus = @status Where TransferId = @transferId;";
 
-        public List<Transfer> GetAllTransfers()
-        {
-            throw new System.NotImplementedException();
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(ConnectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@status",incoming.TransferStatus);
+                    cmd.Parameters.AddWithValue("@transferId", incoming.TransferId);
+
+                    cmd.ExecuteNonQuery();
+
+                    output = GetTransferById(incoming.TransferId);
+                }
+            }
+            catch (SqlException ex)
+            {
+
+                throw new DaoException("Sql exception ocurred", ex);
+            }
+            return output;
         }
 
         public List<Transfer> GetAllTransfersByStatusAndPersonId(int personId, string tranferStatus)
         {
-            throw new System.NotImplementedException();
+            List<Transfer> output = new List<Transfer>();
+            string sql = "Select TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount " +
+                "From Transfers Join Persons As FromId On Transfers.UserFromId = FromId.Id Join Persons " +
+                "As ToId On Transfers.UserToId = ToId.Id Where TransferStatus = @status And (FromId.Id = @id Or ToId.Id = @id);";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(ConnectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@id", personId);
+                    cmd.Parameters.AddWithValue("@status", tranferStatus);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        output.Add(MapRowToTransfer(reader));
+                    }
+
+                }
+            }
+            catch (SqlException ex)
+            {
+
+                throw new DaoException("Sql exception ocurred", ex);
+            }
+            return output;
         }
 
         public List<Transfer> GetAllTransfersByTypeAndPersonId(int personId, string transferType)
         {
-            throw new System.NotImplementedException();
+            List<Transfer> output = new List<Transfer>();
+            string sql = "Select TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount " +
+                "From Transfers Join Persons As FromId On Transfers.UserFromId = FromId.Id Join Persons " +
+                "As ToId On Transfers.UserToId = ToId.Id Where TransferType = @type And (FromId.Id = @id Or ToId.Id = @id);";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(ConnectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@id", personId);
+                    cmd.Parameters.AddWithValue("@type", transferType);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        output.Add(MapRowToTransfer(reader));
+                    }
+
+                }
+            }
+            catch (SqlException ex)
+            {
+
+                throw new DaoException("Sql exception ocurred", ex);
+            }
+            return output;
         }
 
         public Transfer GetTransferById(int transferId)
@@ -107,7 +179,33 @@ namespace TEBucksServer.DAO
 
         public List<Transfer> GetTransfersByPersonId(int personId)
         {
-            throw new System.NotImplementedException();
+            List<Transfer> output = new List<Transfer>();
+            string sql = "Select TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount " +
+                "From Transfers Join Persons As FromId On Transfers.UserFromId = FromId.Id Join Persons " +
+                "As ToId On Transfers.UserToId = ToId.Id Where FromId.Id = @personId Or ToId.Id = @personId;";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(ConnectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@personId",personId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        output.Add(MapRowToTransfer(reader));
+                    }
+
+                }
+            }
+            catch (SqlException ex)
+            {
+
+                throw new DaoException("Sql exception ocurred", ex);
+            }
+            return output;
         }
 
         public Transfer MapRowToTransfer(SqlDataReader reader)
