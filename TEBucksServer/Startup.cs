@@ -59,6 +59,7 @@ namespace TEBucksServer
             services.AddTransient<IUserDao>(sp => new UserSqlDao(connectionString));
             services.AddTransient<IPersonDao>(sp => new PersonSqlDao(connectionString));
             services.AddTransient<IAccountDao>(sp => new AccountSqlDao(connectionString));
+            services.AddTransient<ITransferDao>(sp => new TransferSqlDao(connectionString));
 
             // Swagger Documentation
             services.AddSwaggerGen(s =>
