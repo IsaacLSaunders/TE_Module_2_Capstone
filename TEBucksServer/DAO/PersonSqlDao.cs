@@ -17,7 +17,31 @@ namespace TEBucksServer.DAO
 
         public List<Person> GetAllPeople()
         {
-            throw new NotImplementedException();
+            List<Person> output = new List<Person>();
+            string sql = "SELECT Id, LoginId, FirstName, LastName FROM Persons;";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        output.Add(MapRowToPerson(reader));
+                    }
+
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DaoException("Sql exception occurred", ex);
+            }
+
+            return output;
         }
 
         public Person GetPersonById(int id)

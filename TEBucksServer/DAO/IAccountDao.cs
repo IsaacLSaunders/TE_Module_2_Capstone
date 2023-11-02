@@ -7,5 +7,6 @@ namespace TEBucksServer.DAO
     {
         public Account CreateAccount(int id);
         public Account GetAccountById(int newId);
+
     }
 }
