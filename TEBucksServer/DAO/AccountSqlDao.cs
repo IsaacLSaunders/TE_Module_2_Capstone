@@ -46,7 +46,7 @@ namespace TEBucksServer.DAO
             return newAccount;
         }
 
-        private Account GetAccountById(int newId)
+        public Account GetAccountById(int newId)
         {
             Account newAccount = null;
             string sql = "select AccountId,PersonId,Balance from accounts where AccountId = @accountId";

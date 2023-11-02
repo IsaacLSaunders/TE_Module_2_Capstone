@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using TEBucksServer.Exceptions;
 using TEBucksServer.Models;
@@ -12,6 +13,11 @@ namespace TEBucksServer.DAO
         public PersonSqlDao(string dbConnectionString)
         {
             connectionString = dbConnectionString;
+        }
+
+        public List<Person> GetAllPeople()
+        {
+            throw new NotImplementedException();
         }
 
         public Person GetPersonById(int id)
