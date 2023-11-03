@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TEBucksServer.Models
 {
@@ -6,12 +7,13 @@ namespace TEBucksServer.Models
     {
         public int TransferId { get; set; }
         [Required]
-        public int UserFromId { get; set; }
+        public int UserFrom { get; set; }
         [Required]
-        public int UserToId { get; set; }
+        public int UserTo { get; set; }
         [Required]
         public string TransferType { get; set; }
-        [Required]
+
+        //TODO maybe we can do this as a derived property based on the  transfer type
         public string TransferStatus { get; set; }
         [Required]
         public decimal Amount { get; set; }

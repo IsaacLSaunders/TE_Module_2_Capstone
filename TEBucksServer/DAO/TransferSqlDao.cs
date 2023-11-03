@@ -22,8 +22,8 @@ namespace TEBucksServer.DAO
         {
             Transfer output = null;
             string sql = "Insert Into Transfers (UserFromId, UserToId, TransferType, TransferStatus, Amount) " +
-                "OUTPUT Inserted.TransferId " +
-                "Values (@userFrom, @userTo, @type, @status, @amount)";
+                "OUTPUT Inserted.TransferId Values ((Select Persons.Id FROM Persons WHERE Persons.LoginId = @userFrom)," +
+                " (Select Persons.Id FROM Persons WHERE Persons.LoginId = @userTo), @type, @status, @amount)";
             int newId = 0;
 
             try
@@ -33,8 +33,8 @@ namespace TEBucksServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@userFrom", incoming.UserFromId);
-                    cmd.Parameters.AddWithValue("@userTo", incoming.UserToId);
+                    cmd.Parameters.AddWithValue("@userFrom", incoming.UserFrom);
+                    cmd.Parameters.AddWithValue("@userTo", incoming.UserTo);
                     cmd.Parameters.AddWithValue("@type", incoming.TransferType);
                     cmd.Parameters.AddWithValue("@status", incoming.TransferStatus);
                     cmd.Parameters.AddWithValue("@amount", incoming.Amount);
@@ -215,8 +215,8 @@ namespace TEBucksServer.DAO
             Transfer output = new Transfer();
 
             output.TransferId = Convert.ToInt32(reader["TransferId"]);
-            output.UserFromId = Convert.ToInt32(reader["UserFromId"]);
-            output.UserToId = Convert.ToInt32(reader["UserToId"]);
+            output.UserFrom = Convert.ToInt32(reader["UserFromId"]);
+            output.UserTo = Convert.ToInt32(reader["UserToId"]);
             output.TransferType = Convert.ToString(reader["TransferType"]);
             output.TransferStatus = Convert.ToString(reader["TransferStatus"]);
             output.Amount = Convert.ToDecimal(reader["Amount"]);

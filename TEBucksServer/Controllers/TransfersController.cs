@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using TEBucksServer.DAO;
 using TEBucksServer.Models;
 
@@ -22,14 +24,22 @@ namespace TEBucksServer.Controllers
         }
 
 
-        //TODO tomorrow 
         [HttpGet("{id}")]
         public ActionResult<Transfer> GetTransfer(int id)
         {
             try
             {
                 int userId = UserDao.GetUserByUsername(User.Identity.Name).UserId;
-                return Ok(TransferDao.GetTransferById(userId));
+                List<Transfer> transfers = TransferDao.GetTransfersByPersonId(userId);
+                Transfer output = null;
+                foreach(Transfer transfer in transfers)
+                {
+                    if(transfer.TransferId == id)
+                    {
+                        output = transfer;
+                    }
+                }
+                return Ok(output);
             }
             catch (System.Exception)
             {
@@ -42,8 +52,15 @@ namespace TEBucksServer.Controllers
         {
             try
             {
-                incoming.TransferId = 0;
-                return Ok(TransferDao.CreateTransfer(incoming));
+                incoming.TransferStatus = incoming.TransferType == "Send" ? "Approved" : "Pending";
+                Transfer output = TransferDao.CreateTransfer(incoming);
+                if (output.TransferStatus == "Approved")
+                {
+                    //send money to an account
+                    AccountDao.IncrementBalance(output);
+                }
+
+                return Ok(output);
             }
             catch (System.Exception)
             {
@@ -51,5 +68,9 @@ namespace TEBucksServer.Controllers
                 return StatusCode(500);
             }
         }
+
+        ////TODO approve and reject transfer http put with transfer status update DTO
+        //[HttpPut({id}/status)]
+        //public ActionResult<Transfer> ApproveOrRejectTransfer()
     }
 }
