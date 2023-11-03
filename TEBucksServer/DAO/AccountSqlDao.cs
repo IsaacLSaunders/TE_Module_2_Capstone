@@ -80,6 +80,25 @@ namespace TEBucksServer.DAO
             return newAccount;
         }
 
+        /// <summary>
+        /// send money to an account
+        /// </summary>
+        /// <param name="incoming"></param>
+        /// <returns></returns>
+        public bool IncrementBalance(Transfer incoming)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// request money from an account
+        /// </summary>
+        /// <param name="incoming"></param>
+        /// <returns></returns>
+        public bool DecrementBalance(Transfer incoming)
+        {
+            return true;
+        }
 
         private Account MapRowToAccount(SqlDataReader reader)
         {
