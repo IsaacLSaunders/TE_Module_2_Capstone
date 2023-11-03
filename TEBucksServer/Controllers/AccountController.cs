@@ -28,7 +28,7 @@ namespace TEBucksServer.Controllers
             try
             {
                 int userId = UserDao.GetUserByUsername(User.Identity.Name).UserId;
-                return Ok(AccountDao.GetAccountById(userId));
+                return Ok(AccountDao.GetAccountByUserId(userId));
             }
             catch (System.Exception)
             {
@@ -37,7 +37,7 @@ namespace TEBucksServer.Controllers
         }
 
         [HttpGet("transfers")]
-        public ActionResult<List<Transfer>> GetAllTransfers()
+        public ActionResult<List<TransferDto>> GetAllTransfers()
         {
             try
             {

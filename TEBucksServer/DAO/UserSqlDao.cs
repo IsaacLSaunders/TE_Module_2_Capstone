@@ -48,6 +48,39 @@ namespace TEBucksServer.DAO
             return user;
         }
 
+        public User GetUserByPersonId(int personId)
+        {
+            User user = null;
+
+            string sql = "SELECT user_id, username, password_hash, salt FROM users " +
+                "JOIN Persons ON Persons.LoginId = users.user_id " +
+                "WHERE Persons.Id = @personId;";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@personId", personId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        user = MapRowToUser(reader);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new DaoException("SQL exception occurred", ex);
+            }
+
+            return user;
+        }
+
         public User GetUserByUsername(string username)
         {
             User user = null;
