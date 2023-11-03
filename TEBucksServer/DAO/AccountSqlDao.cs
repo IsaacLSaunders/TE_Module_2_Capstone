@@ -19,7 +19,7 @@ namespace TEBucksServer.DAO
         public Account CreateAccount(int id)
         {
             Account newAccount = new Account();
-            string sql = "insert into Accounts(PersonId,Balance) output inserted.AccountId values(@personid,@balance)";
+            string sql = "insert into Accounts(PersonId,Balance) output inserted.PersonId values(@personid,@balance)";
             int newId = 0;
 
             try
@@ -34,7 +34,7 @@ namespace TEBucksServer.DAO
 
                     newId = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    newAccount = GetAccountById(newId);
+                    newAccount = GetAccountByPersonId(newId);
 
                 }
             }
@@ -46,7 +46,7 @@ namespace TEBucksServer.DAO
             return newAccount;
         }
 
-        public Account GetAccountById(int newId)
+        public Account GetAccountByUserId(int newId)
         {
             Account newAccount = null;
             string sql = "select AccountId,PersonId,Balance from accounts " +
@@ -71,6 +71,40 @@ namespace TEBucksServer.DAO
 
 
                 }       
+            }
+            catch (SqlException e)
+            {
+
+                throw new DaoException(e.Message);
+            }
+            return newAccount;
+        }
+
+        public Account GetAccountByPersonId(int newId)
+        {
+            Account newAccount = null;
+            string sql = "SELECT AccountId, PersonId, Balance FROM accounts " +
+                "JOIN Persons ON Persons.Id = Accounts.PersonId " +
+                "JOIN users ON Persons.LoginId = users.user_id " +
+                "WHERE users.user_id = @userId";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@userId", newId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    if (reader.Read())
+                    {
+                        newAccount = MapRowToAccount(reader);
+                    }
+
+
+                }
             }
             catch (SqlException e)
             {

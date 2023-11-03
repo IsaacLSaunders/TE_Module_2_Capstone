@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Linq;
 using TEBucksServer.Exceptions;
 using TEBucksServer.Models;
 
@@ -18,9 +19,9 @@ namespace TEBucksServer.DAO
 
         public TransferSqlDao() { }
 
-        public Transfer CreateTransfer(Transfer incoming)
+        public TransferDto CreateTransfer(Transfer incoming)
         {
-            Transfer output = null;
+            TransferDto output = null;
             string sql = "Insert Into Transfers (UserFromId, UserToId, TransferType, TransferStatus, Amount) " +
                 "OUTPUT Inserted.TransferId Values ((Select Persons.Id FROM Persons WHERE Persons.LoginId = @userFrom)," +
                 " (Select Persons.Id FROM Persons WHERE Persons.LoginId = @userTo), @type, @status, @amount)";
@@ -41,7 +42,7 @@ namespace TEBucksServer.DAO
 
                     newId = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    output = GetTransferById(newId);
+                    output = GetTransferDtoById(newId);
                 }
             }
             catch (SqlException ex)
@@ -56,7 +57,7 @@ namespace TEBucksServer.DAO
         public Transfer EditTransferStatus(TransferStatusUpdateDto status, int id)
         {
             Transfer output = null;
-            string sql = "Update Transfers Set TranferStatus = @status Where TransferId = @transferId;";
+            string sql = "Update Transfers Set TransferStatus = @status Where TransferId = @transferId;";
 
             try
             {
@@ -68,9 +69,9 @@ namespace TEBucksServer.DAO
                     cmd.Parameters.AddWithValue("@status",status.TransferStatus);
                     cmd.Parameters.AddWithValue("@transferId", id);
 
-                    cmd.ExecuteNonQuery();
+                    int newId = Convert.ToInt32(cmd.ExecuteScalar());
 
-                    output = GetTransferById(id);
+                    output = GetTransferById(newId);
                 }
             }
             catch (SqlException ex)
@@ -147,6 +148,7 @@ namespace TEBucksServer.DAO
 
         public Transfer GetTransferById(int transferId)
         {
+
             Transfer output = null;
             string sql = "SELECT TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount " +
                 "FROM Transfers WHERE TransferId = @transferId;";
@@ -166,6 +168,7 @@ namespace TEBucksServer.DAO
                         output = MapRowToTransfer(reader);
                     }
 
+
                 }
             }
             catch (SqlException ex)
@@ -177,9 +180,60 @@ namespace TEBucksServer.DAO
 
         }
 
-        public List<Transfer> GetTransfersByPersonId(int userId)
+        public TransferDto GetTransferDtoById (int transferId)
         {
+            IUserDao UserDao = new UserSqlDao(ConnectionString);
+
+            Transfer output = null;
+            TransferDto actualOutput = new TransferDto();
+
+            string sql = "SELECT TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount " +
+                "FROM Transfers WHERE TransferId = @transferId;";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(ConnectionString))
+                {
+                    conn.Open();
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("transferId", transferId);
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        output = MapRowToTransfer(reader);
+                    }
+
+                    User userFrom = UserDao.GetUserByPersonId(output.UserFrom);
+                    User userTo = UserDao.GetUserByPersonId(output.UserTo);
+
+                    actualOutput.TransferId = output.TransferId;
+                    actualOutput.userFrom = UserDao.GetUserByPersonId(output.UserFrom);
+                    actualOutput.userTo = UserDao.GetUserByPersonId(output.UserTo);
+                    actualOutput.TransferType = output.TransferType;
+                    actualOutput.TransferStatus = output.TransferStatus;
+                    actualOutput.Amount = output.Amount;
+
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new DaoException("Sql exception occurred", ex);
+            }
+
+            return actualOutput;
+
+        }
+
+
+
+        public List<TransferDto> GetTransfersByPersonId(int userId)
+        {
+            IUserDao UserDao = new UserSqlDao(ConnectionString);
+
             List<Transfer> output = new List<Transfer>();
+            List<TransferDto> actual = new List<TransferDto>();
             string sql = "Select TransferId, UserFromId, UserToId, TransferType, TransferStatus, Amount From Transfers " +
                 "WHERE UserFromId = " +
                 "(Select persons.Id FROM Persons JOIN users ON persons.LoginId = users.user_id WHERE user_id = @userId) " +
@@ -207,7 +261,24 @@ namespace TEBucksServer.DAO
 
                 throw new DaoException("Sql exception ocurred", ex);
             }
-            return output;
+
+            foreach(Transfer transfer in output)
+            {
+                TransferDto actualOutput = new TransferDto();
+
+
+                User userFrom = UserDao.GetUserByPersonId(transfer.UserFrom);
+                User userTo = UserDao.GetUserByPersonId(transfer.UserTo);
+
+                actualOutput.TransferId = transfer.TransferId;
+                actualOutput.userFrom = UserDao.GetUserByPersonId(transfer.UserFrom);
+                actualOutput.userTo = UserDao.GetUserByPersonId(transfer.UserTo);
+                actualOutput.TransferType = transfer.TransferType;
+                actualOutput.TransferStatus = transfer.TransferStatus;
+                actualOutput.Amount = transfer.Amount;
+            }
+
+            return actual;
         }
 
         public Transfer MapRowToTransfer(SqlDataReader reader)
@@ -217,11 +288,23 @@ namespace TEBucksServer.DAO
             output.TransferId = Convert.ToInt32(reader["TransferId"]);
             output.UserFrom = Convert.ToInt32(reader["UserFromId"]);
             output.UserTo = Convert.ToInt32(reader["UserToId"]);
+            //output.UserFromObj = MapRowToUser(reader);
+            //output.UserToObj = MapRowToUser(reader);
             output.TransferType = Convert.ToString(reader["TransferType"]);
             output.TransferStatus = Convert.ToString(reader["TransferStatus"]);
             output.Amount = Convert.ToDecimal(reader["Amount"]);
 
             return output;
         }
+
+        //public User MapRowToUser(SqlDataReader reader)
+        //{
+        //    User user = new User();
+        //    user.UserId = Convert.ToInt32(reader["user_id"]);
+        //    user.Username = Convert.ToString(reader["username"]);
+        //    user.PasswordHash = Convert.ToString(reader["password_hash"]);
+        //    user.Salt = Convert.ToString(reader["salt"]);
+        //    return user;
+        //}
     }
 }

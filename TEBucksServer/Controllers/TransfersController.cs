@@ -30,9 +30,9 @@ namespace TEBucksServer.Controllers
             try
             {
                 int userId = UserDao.GetUserByUsername(User.Identity.Name).UserId;
-                List<Transfer> transfers = TransferDao.GetTransfersByPersonId(userId);
-                Transfer output = null;
-                foreach(Transfer transfer in transfers)
+                List<TransferDto> transfers = TransferDao.GetTransfersByPersonId(userId);
+                TransferDto output = null;
+                foreach(TransferDto transfer in transfers)
                 {
                     if(transfer.TransferId == id)
                     {
@@ -48,26 +48,36 @@ namespace TEBucksServer.Controllers
         }
 
         [HttpPost]
-        public ActionResult<Transfer> CreateTransfer(Transfer incoming)
+        public ActionResult<TransferDto> CreateTransfer(Transfer incoming)
         {
-            //TODO can't send more than what's in the account
-            //TODO can't send 0 or a negative number
-            //TODO can't send money to yourself
+
+            if(!ValidateTransfer(incoming))
+            {
+                return BadRequest();
+            }
+
             try
             {
                 incoming.TransferStatus = incoming.TransferType == "Send" ? "Approved" : "Pending";
-                Transfer output = TransferDao.CreateTransfer(incoming);
+                TransferDto output = TransferDao.CreateTransfer(incoming);
+                Transfer temp = new Transfer();
+                temp.TransferId = output.TransferId;
+                temp.TransferStatus = output.TransferStatus;
+                temp.TransferType = output.TransferType;
+                temp.Amount = output.Amount;
+                temp.UserFrom = output.userFrom.UserId;
+                temp.UserTo = output.userTo.UserId;
+
                 if (output.TransferStatus == "Approved")
                 {
                     //send money to an account
-                    AccountDao.IncrementBalance(output);
+                    AccountDao.IncrementBalance(temp);
                 }
 
                 return Ok(output);
             }
             catch (System.Exception)
             {
-
                 return StatusCode(500);
             }
         }
@@ -76,8 +86,7 @@ namespace TEBucksServer.Controllers
         [HttpPut("{id}/status")]
         public ActionResult<Transfer> ApproveOrRejectTransfer(TransferStatusUpdateDto status, int id)
         {
-            //TODO can't request money from yourself
-            //TODO can't request 0 or negative numbers
+
             Transfer output = null;
             try
             {
@@ -93,6 +102,46 @@ namespace TEBucksServer.Controllers
                 return StatusCode(500);
             }
             return Ok(output);
+        }
+
+
+        private bool ValidateTransfer(Transfer incoming)
+        {
+            //can't send money to yourself
+            if (incoming.UserFrom == incoming.UserTo)
+            {
+                return false;
+            }
+
+            //can't send 0 or a negative number
+            if (incoming.Amount <= 0)
+            {
+                return false;
+            }
+
+            //TODO can't send more than what's in the account
+            try
+            {
+                Account fromAccount = AccountDao.GetAccountByPersonId(incoming.UserFrom);
+                Account toAccount = AccountDao.GetAccountByPersonId(incoming.UserTo);
+                if (incoming.TransferType == "Send" && fromAccount.Balance < incoming.Amount)
+                {
+                    return false;
+                }
+                else if (incoming.TransferType != "Send" && toAccount.Balance < incoming.Amount)
+                {
+                    return false;
+                }
+            }
+            //TODO not really sure about how/what exception to throw here
+            catch (System.Exception e)
+            {
+               throw new System.Exception(e.Message);
+            }
+
+
+            //not sure about returning null here...
+            return true;
         }
     }
 }
