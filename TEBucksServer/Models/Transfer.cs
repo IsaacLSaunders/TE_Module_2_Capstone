@@ -18,4 +18,9 @@ namespace TEBucksServer.Models
         [Required]
         public decimal Amount { get; set; }
     }
+
+    public class TransferStatusUpdateDto
+    {
+        public string TransferStatus { get; set; }
+    }
 }

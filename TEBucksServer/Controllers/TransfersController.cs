@@ -50,6 +50,9 @@ namespace TEBucksServer.Controllers
         [HttpPost]
         public ActionResult<Transfer> CreateTransfer(Transfer incoming)
         {
+            //TODO can't send more than what's in the account
+            //TODO can't send 0 or a negative number
+            //TODO can't send money to yourself
             try
             {
                 incoming.TransferStatus = incoming.TransferType == "Send" ? "Approved" : "Pending";
@@ -69,8 +72,27 @@ namespace TEBucksServer.Controllers
             }
         }
 
-        ////TODO approve and reject transfer http put with transfer status update DTO
-        //[HttpPut({id}/status)]
-        //public ActionResult<Transfer> ApproveOrRejectTransfer()
+        //TODO approve and reject transfer http put with transfer status update DTO
+        [HttpPut("{id}/status")]
+        public ActionResult<Transfer> ApproveOrRejectTransfer(TransferStatusUpdateDto status, int id)
+        {
+            //TODO can't request money from yourself
+            //TODO can't request 0 or negative numbers
+            Transfer output = null;
+            try
+            {
+                output = TransferDao.EditTransferStatus(status,id);
+                if (output.TransferStatus == "Approved")
+                {
+                    AccountDao.DecrementBalance(output);
+                }
+            }
+            catch (System.Exception)
+            {
+
+                return StatusCode(500);
+            }
+            return Ok(output);
+        }
     }
 }

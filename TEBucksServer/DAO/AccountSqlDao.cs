@@ -87,7 +87,45 @@ namespace TEBucksServer.DAO
         /// <returns></returns>
         public bool IncrementBalance(Transfer incoming)
         {
-            return true;
+            bool success = false;
+            string sql = "BEGIN TRANSACTION " +
+                "UPDATE Accounts SET Balance = Balance - @amount " +
+                "WHERE " +
+                "(SELECT TOP 1 Accounts.PersonId " +
+                "FROM Accounts " +
+                "JOIN Persons ON Persons.Id = Accounts.PersonId " +
+                "JOIN Transfers ON Transfers.UserFromId = Persons.Id " +
+                "WHERE Transfers.UserFromId = @fromId) = Accounts.PersonId " +
+                "UPDATE Accounts SET Balance = Balance + @amount " +
+                "WHERE " +
+                "(SELECT TOP 1 Accounts.PersonId " +
+                "FROM Accounts " +
+                "JOIN Persons ON Persons.Id = Accounts.PersonId " +
+                "JOIN Transfers ON Transfers.UserToId = Persons.Id " +
+                "WHERE Transfers.UserToId = @toId) = Accounts.PersonId " +
+                "COMMIT";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@fromId",incoming.UserFrom);
+                    cmd.Parameters.AddWithValue("@toId",incoming.UserTo);
+                    cmd.Parameters.AddWithValue("@amount",incoming.Amount);
+
+                    int affected = cmd.ExecuteNonQuery();
+                    success = affected > 0 ? true : false;
+                }
+            }
+            catch (SqlException e)
+            {
+
+                throw new DaoException(e.Message);
+            }
+            return success;
         }
 
         /// <summary>
@@ -97,7 +135,45 @@ namespace TEBucksServer.DAO
         /// <returns></returns>
         public bool DecrementBalance(Transfer incoming)
         {
-            return true;
+            bool success = false;
+            string sql = "BEGIN TRANSACTION " +
+                "UPDATE Accounts SET Balance = Balance + @amount " +
+                "WHERE " +
+                "(SELECT TOP 1 Accounts.PersonId " +
+                "FROM Accounts " +
+                "JOIN Persons ON Persons.Id = Accounts.PersonId " +
+                "JOIN Transfers ON Transfers.UserFromId = Persons.Id " +
+                "WHERE Transfers.UserFromId = @fromId) = Accounts.PersonId " +
+                "UPDATE Accounts SET Balance = Balance - @amount " +
+                "WHERE " +
+                "(SELECT TOP 1 Accounts.PersonId " +
+                "FROM Accounts " +
+                "JOIN Persons ON Persons.Id = Accounts.PersonId " +
+                "JOIN Transfers ON Transfers.UserToId = Persons.Id " +
+                "WHERE Transfers.UserToId = @toId) = Accounts.PersonId " +
+                "COMMIT";
+
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+
+                    SqlCommand cmd = new SqlCommand(sql, conn);
+                    cmd.Parameters.AddWithValue("@fromId", incoming.UserFrom);
+                    cmd.Parameters.AddWithValue("@toId", incoming.UserTo);
+                    cmd.Parameters.AddWithValue("@amount", incoming.Amount);
+
+                    int affected = cmd.ExecuteNonQuery();
+                    success = affected > 0 ? true : false;
+                }
+            }
+            catch (SqlException e)
+            {
+
+                throw new DaoException(e.Message);
+            }
+            return success;
         }
 
         private Account MapRowToAccount(SqlDataReader reader)

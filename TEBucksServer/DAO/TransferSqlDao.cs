@@ -53,7 +53,7 @@ namespace TEBucksServer.DAO
             return output;
         }
 
-        public Transfer EditTransferStatus(Transfer incoming)
+        public Transfer EditTransferStatus(TransferStatusUpdateDto status, int id)
         {
             Transfer output = null;
             string sql = "Update Transfers Set TranferStatus = @status Where TransferId = @transferId;";
@@ -65,12 +65,12 @@ namespace TEBucksServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@status",incoming.TransferStatus);
-                    cmd.Parameters.AddWithValue("@transferId", incoming.TransferId);
+                    cmd.Parameters.AddWithValue("@status",status.TransferStatus);
+                    cmd.Parameters.AddWithValue("@transferId", id);
 
                     cmd.ExecuteNonQuery();
 
-                    output = GetTransferById(incoming.TransferId);
+                    output = GetTransferById(id);
                 }
             }
             catch (SqlException ex)
