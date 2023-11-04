@@ -13,20 +13,21 @@ namespace TEBucksServer.Controllers
     {
 
         private readonly IUserDao UserDao;
-        private readonly IPersonDao PersonDao;
 
-        public UsersController(IUserDao userDao, IPersonDao personDao)
+        public UsersController(IUserDao userDao)
         {
             UserDao = userDao;
-            PersonDao = personDao;
         }
 
         [HttpGet]
-        public ActionResult<List<Person>> GetAllUsers()
+        public ActionResult<List<User>> GetAllUsers()
         {
+            List<User> output = null;
             try
             {
-                return Ok(UserDao.GetUsers());
+                output = UserDao.GetUsers();
+
+                return Ok(output);
             }
             catch (System.Exception)
             {

@@ -6,30 +6,10 @@ namespace TEBucksServer.Models
     public class Transfer
     {
         public int TransferId { get; set; }
-        public int UserFrom { get; set; }
-        public int UserTo { get; set; }
-        public string TransferType { get; set; }
-
-        //TODO maybe we can do this as a derived property based on the  transfer type
-        public string TransferStatus { get; set; }
-        [Required]
-        public decimal Amount { get; set; }
-    }
-
-    public class TransferStatusUpdateDto
-    {
-        public string TransferStatus { get; set; }
-    }
-
-    public class TransferDto
-    {
-        public int TransferId { get; set; }
-        public User userFrom { get; set; }
-        public User userTo { get; set; }
+        public User UserFrom { get; set; }
+        public User UserTo { get; set; }
         public string TransferType { get; set; }
         public string TransferStatus { get; set; }
-        [Required]
         public decimal Amount { get; set; }
     }
-
 }

@@ -23,23 +23,13 @@ namespace TEBucksServer.Controllers
             TransferDao = transferDao;
         }
 
-
+        //TODO get an individual transfer
         [HttpGet("{id}")]
         public ActionResult<Transfer> GetTransfer(int id)
         {
             try
             {
-                int userId = UserDao.GetUserByUsername(User.Identity.Name).UserId;
-                List<TransferDto> transfers = TransferDao.GetTransfersByPersonId(userId);
-                TransferDto output = null;
-                foreach(TransferDto transfer in transfers)
-                {
-                    if(transfer.TransferId == id)
-                    {
-                        output = transfer;
-                    }
-                }
-                return Ok(output);
+
             }
             catch (System.Exception)
             {
@@ -47,6 +37,7 @@ namespace TEBucksServer.Controllers
             }
         }
 
+        //TODO create a transfer REQUEST OR SEND
         [HttpPost]
         public ActionResult<TransferDto> CreateTransfer(Transfer incoming)
         {
@@ -58,23 +49,7 @@ namespace TEBucksServer.Controllers
 
             try
             {
-                incoming.TransferStatus = incoming.TransferType == "Send" ? "Approved" : "Pending";
-                TransferDto output = TransferDao.CreateTransfer(incoming);
-                Transfer temp = new Transfer();
-                temp.TransferId = output.TransferId;
-                temp.TransferStatus = output.TransferStatus;
-                temp.TransferType = output.TransferType;
-                temp.Amount = output.Amount;
-                temp.UserFrom = output.userFrom.UserId;
-                temp.UserTo = output.userTo.UserId;
 
-                if (output.TransferStatus == "Approved")
-                {
-                    //send money to an account
-                    AccountDao.IncrementBalance(temp);
-                }
-
-                return Ok(output);
             }
             catch (System.Exception)
             {
@@ -87,51 +62,30 @@ namespace TEBucksServer.Controllers
         public ActionResult<Transfer> ApproveOrRejectTransfer(TransferStatusUpdateDto status, int id)
         {
 
-            Transfer output = null;
             try
             {
-                output = TransferDao.EditTransferStatus(status,id);
-                if (output.TransferStatus == "Approved")
-                {
-                    AccountDao.DecrementBalance(output);
-                }
+
             }
             catch (System.Exception)
             {
 
                 return StatusCode(500);
             }
-            return Ok(output);
         }
 
 
+        //TODO VALIDATE A TRANSFER what should this return?
         private bool ValidateTransfer(Transfer incoming)
         {
-            //can't send money to yourself
-            if (incoming.UserFrom == incoming.UserTo)
-            {
-                return false;
-            }
+            //TODO can't send money to yourself
 
-            //can't send 0 or a negative number
-            if (incoming.Amount <= 0)
-            {
-                return false;
-            }
+            //TODO can't send 0 or a negative number
+
 
             //TODO can't send more than what's in the account
             try
             {
-                Account fromAccount = AccountDao.GetAccountByPersonId(incoming.UserFrom);
-                Account toAccount = AccountDao.GetAccountByPersonId(incoming.UserTo);
-                if (incoming.TransferType == "Send" && fromAccount.Balance < incoming.Amount)
-                {
-                    return false;
-                }
-                else if (incoming.TransferType != "Send" && toAccount.Balance < incoming.Amount)
-                {
-                    return false;
-                }
+
             }
             //TODO not really sure about how/what exception to throw here
             catch (System.Exception e)
@@ -140,7 +94,6 @@ namespace TEBucksServer.Controllers
             }
 
 
-            //not sure about returning null here...
             return true;
         }
     }

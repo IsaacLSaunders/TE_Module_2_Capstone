@@ -57,7 +57,6 @@ namespace TEBucksServer
             services.AddSingleton<ITokenGenerator>(sp => new JwtGenerator(Configuration["JwtSecret"]));
             services.AddSingleton<IPasswordHasher>(sp => new PasswordHasher());
             services.AddTransient<IUserDao>(sp => new UserSqlDao(connectionString));
-            services.AddTransient<IPersonDao>(sp => new PersonSqlDao(connectionString));
             services.AddTransient<IAccountDao>(sp => new AccountSqlDao(connectionString));
             services.AddTransient<ITransferDao>(sp => new TransferSqlDao(connectionString));
 
