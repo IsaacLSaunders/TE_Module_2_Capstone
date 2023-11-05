@@ -69,7 +69,8 @@ namespace TEBucksServer.Controllers
             {
                 //check if the user that is logged in can only change the status of transfers they have access to
                 User user = UserDao.GetUserByUsername(User.Identity.Name);
-                if(user.UserId != id)
+                Transfer curTransfer = TransferDao.GetTransferByTransferId(id);
+                if(user.UserId != curTransfer.UserFrom.UserId)
                 {
                     return BadRequest();
                 }
