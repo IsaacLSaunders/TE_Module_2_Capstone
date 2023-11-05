@@ -8,6 +8,7 @@ namespace TEBucksServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AccountController : Controller
     {
         private readonly IAccountDao AccountDao;
