@@ -117,7 +117,8 @@ namespace TEBucksServer.DAO
         public bool IncrementBalance(Transfer incoming)
         {
             bool success = false;
-            string sql = "";
+            string sql = "UPDATE accounts SET balance = balance + @amount " +
+                "WHERE userId = @userId;";
 
             try
             {
@@ -126,7 +127,20 @@ namespace TEBucksServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(sql, conn);
+                    if (incoming.TransferType == "Send")
+                    {
+                        cmd.Parameters.AddWithValue("@amount", incoming.Amount);
+                        cmd.Parameters.AddWithValue("@userId", incoming.UserTo.UserId);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@amount", incoming.Amount);
+                        cmd.Parameters.AddWithValue("@userId", incoming.UserFrom.UserId);
+                    }
 
+                    int affected = cmd.ExecuteNonQuery();
+
+                    success = affected > 0 ? true : false;
 
                 }
             }
@@ -146,7 +160,8 @@ namespace TEBucksServer.DAO
         public bool DecrementBalance(Transfer incoming)
         {
             bool success = false;
-            string sql = "";
+            string sql = "UPDATE accounts SET balance = balance - @amount " +
+                "WHERE userId = @userId;";
 
             try
             {
@@ -155,6 +170,20 @@ namespace TEBucksServer.DAO
                     conn.Open();
 
                     SqlCommand cmd = new SqlCommand(sql, conn);
+                    if(incoming.TransferType == "Send")
+                    {
+                        cmd.Parameters.AddWithValue("@amount", incoming.Amount);
+                        cmd.Parameters.AddWithValue("@userId", incoming.UserFrom.UserId);
+                    } 
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("@amount", incoming.Amount);
+                        cmd.Parameters.AddWithValue("@userId", incoming.UserTo.UserId);
+                    }
+
+                    int affected = cmd.ExecuteNonQuery();
+
+                    success = affected > 0 ? true : false;
 
                 }
             }
