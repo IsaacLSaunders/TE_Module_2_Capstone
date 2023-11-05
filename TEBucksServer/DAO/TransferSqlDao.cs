@@ -66,7 +66,7 @@ namespace TEBucksServer.DAO
         public Transfer EditTransferStatus(TransferStatusUpdateDto status, int id)
         {
             Transfer output = null;
-            string sql = "UPDATE transfers SET transferStatus = 'Rejected' " +
+            string sql = "UPDATE transfers SET transferStatus = @status " +
                 "OUTPUT INSERTED.transferId " +
                 "WHERE transferId = @id;";
             int idActual = 0;
@@ -79,6 +79,7 @@ namespace TEBucksServer.DAO
 
                     SqlCommand cmd = new SqlCommand(sql, conn);
                     cmd.Parameters.AddWithValue("@id", id);
+                    cmd.Parameters.AddWithValue("@status", status.transferStatus);
 
                     idActual = Convert.ToInt32(cmd.ExecuteScalar());
 

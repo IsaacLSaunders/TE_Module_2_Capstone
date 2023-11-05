@@ -29,11 +29,9 @@ namespace TEBucksServer.Controllers
         [HttpGet("{id}")]
         public ActionResult<Transfer> GetTransfer(int id)
         {
-            Transfer output = null;
             try
             {
-                output = TransferDao.GetTransferByTransferId(id);
-                return Ok(output);
+                return Ok(TransferDao.GetTransferByTransferId(id));
             }
             catch (System.Exception)
             {
@@ -45,8 +43,7 @@ namespace TEBucksServer.Controllers
         [HttpPost]
         public ActionResult<Transfer> CreateTransfer(NewTransferDto incoming)
         {
-            Transfer output = null;
-
+            
             if (!ValidateTransfer(incoming))
             {
                 return BadRequest();
@@ -54,7 +51,7 @@ namespace TEBucksServer.Controllers
 
             try
             {
-                output = TransferDao.CreateTransfer(incoming);
+                Transfer output = TransferDao.CreateTransfer(incoming);
                 return Created($"/api/transfers/{output.TransferId}", output);
             }
             catch (Exception)
@@ -67,7 +64,6 @@ namespace TEBucksServer.Controllers
         [HttpPut("{id}/status")]
         public ActionResult<Transfer> ApproveOrRejectTransfer(TransferStatusUpdateDto status, int id)
         {
-            Transfer output = null;
       
             try
             {
@@ -78,7 +74,7 @@ namespace TEBucksServer.Controllers
                     return BadRequest();
                 }
 
-                output = TransferDao.EditTransferStatus(status, id);
+                Transfer output = TransferDao.EditTransferStatus(status, id);
                 return Ok(output);
 
             }

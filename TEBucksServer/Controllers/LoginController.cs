@@ -51,7 +51,7 @@ namespace TEBucksServer.Controllers
                 ReturnUser retUser = new ReturnUser() { User = user, Token = token };
 
                 // Switch to 200 OK
-                result = Ok(retUser);
+                return Ok(retUser);
             }
 
             return result;
@@ -97,7 +97,7 @@ namespace TEBucksServer.Controllers
             if (newUser != null)
             {
                 // Create a ReturnUser object to return to the client
-                ReturnUser returnUser = new ReturnUser() { User = newUser };
+                ReturnUser returnUser = new ReturnUser() { User = newUser};
 
                 result = Created("/login", returnUser);
             }
