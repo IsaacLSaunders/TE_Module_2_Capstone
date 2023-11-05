@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data.Common;
 using System.Data.SqlClient;
 using TEBucksServer.Exceptions;
 using TEBucksServer.Models;
@@ -146,15 +148,16 @@ namespace TEBucksServer.DAO
             return newUser;
         }
 
-        private User MapRowToUser(SqlDataReader reader)
+        public User MapRowToUser(SqlDataReader reader)
         {
+
             User user = new User();
-            user.UserId = Convert.ToInt32(reader["user_id"]);
-            user.FirstName = Convert.ToString(reader["firstname"]);
-            user.LastName = Convert.ToString(reader["lastname"]);
-            user.Username = Convert.ToString(reader["username"]);
-            user.PasswordHash = Convert.ToString(reader["password_hash"]);
-            user.Salt = Convert.ToString(reader["salt"]);
+            user.UserId = Convert.ToInt32(reader[0]);
+            user.FirstName = Convert.ToString(reader[1]);
+            user.LastName = Convert.ToString(reader[2]);
+            user.Username = Convert.ToString(reader[3]);
+            user.PasswordHash = Convert.ToString(reader[4]);
+            user.Salt = Convert.ToString(reader[5]);
             return user;
         }
     }

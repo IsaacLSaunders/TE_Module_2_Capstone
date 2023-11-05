@@ -6,7 +6,7 @@ using TEBucksServer.Models;
 
 namespace TEBucksServer.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/account")]
     [ApiController]
     [Authorize]
     public class AccountController : Controller
@@ -22,13 +22,17 @@ namespace TEBucksServer.Controllers
             TransferDao = transferDao;
         }
 
-        //TODO get a users balance
+        //get a users balance
         [HttpGet("balance")]
         public ActionResult<Account> GetAccount()
         {
+            Account output = null;
+            User user = null;
             try
             {
-
+                user = UserDao.GetUserByUsername(User.Identity.Name);
+                output = AccountDao.GetAccountByUserId(user.UserId);
+                return Ok(output);
             }
             catch (System.Exception)
             {
@@ -36,13 +40,15 @@ namespace TEBucksServer.Controllers
             }
         }
 
-        //TODO get all of a users transfers
+        //get all of a users transfers
         [HttpGet("transfers")]
         public ActionResult<List<Transfer>> GetAllTransfers()
         {
+            List<Transfer> transfers = null;
             try
             {
-
+                transfers = TransferDao.GetTransfersByUserName(User.Identity.Name);
+                return Ok(transfers);
             }
             catch (System.Exception)
             {

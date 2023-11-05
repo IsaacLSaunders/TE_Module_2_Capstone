@@ -86,7 +86,7 @@ namespace TEBucksServer.Controllers
             {
                 //create a user
                 newUser = userDao.CreateUser(userParam.Username, userParam.Password, userParam.FirstName, userParam.LastName);
-                // TODO create account for new user
+                //create account for new user
                 newAccount = accountDao.CreateAccount(newUser.UserId);
             }
             catch (DaoException)
