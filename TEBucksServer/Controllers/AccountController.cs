@@ -22,13 +22,17 @@ namespace TEBucksServer.Controllers
             TransferDao = transferDao;
         }
 
+        //get a users balance
         [HttpGet("balance")]
         public ActionResult<Account> GetAccount()
         {
+            Account output = null;
+            User user = null;
             try
             {
-                int userId = UserDao.GetUserByUsername(User.Identity.Name).UserId;
-                return Ok(AccountDao.GetAccountByUserId(userId));
+                user = UserDao.GetUserByUsername(User.Identity.Name);
+                output = AccountDao.GetAccountByUserId(user.UserId);
+                return Ok(output);
             }
             catch (System.Exception)
             {
@@ -36,13 +40,15 @@ namespace TEBucksServer.Controllers
             }
         }
 
+        //get all of a users transfers
         [HttpGet("transfers")]
-        public ActionResult<List<TransferDto>> GetAllTransfers()
+        public ActionResult<List<Transfer>> GetAllTransfers()
         {
+            List<Transfer> transfers = null;
             try
             {
-                int userId = UserDao.GetUserByUsername(User.Identity.Name).UserId;
-                return Ok(TransferDao.GetTransfersByPersonId(userId));
+                transfers = TransferDao.GetTransfersByUserName(User.Identity.Name);
+                return Ok(transfers);
             }
             catch (System.Exception)
             {

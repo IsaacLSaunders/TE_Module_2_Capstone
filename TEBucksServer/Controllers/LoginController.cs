@@ -13,15 +13,13 @@ namespace TEBucksServer.Controllers
         private readonly ITokenGenerator tokenGenerator;
         private readonly IPasswordHasher passwordHasher;
         private readonly IUserDao userDao;
-        private readonly IPersonDao personDao;
         private readonly IAccountDao accountDao;
 
-        public LoginController(ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IUserDao userDao, IPersonDao personDao, IAccountDao accountDao)
+        public LoginController(ITokenGenerator tokenGenerator, IPasswordHasher passwordHasher, IUserDao userDao, IAccountDao accountDao)
         {
             this.tokenGenerator = tokenGenerator;
             this.passwordHasher = passwordHasher;
             this.userDao = userDao;
-            this.personDao = personDao;
             this.accountDao = accountDao;
         }
 
@@ -53,7 +51,7 @@ namespace TEBucksServer.Controllers
                 ReturnUser retUser = new ReturnUser() { User = user, Token = token };
 
                 // Switch to 200 OK
-                result = Ok(retUser);
+                return Ok(retUser);
             }
 
             return result;
@@ -83,13 +81,13 @@ namespace TEBucksServer.Controllers
 
             // create new user
             User newUser;
-            Person newPerson;
             Account newAccount;
             try
             {
-                newUser = userDao.CreateUser(userParam.Username, userParam.Password);
-                newPerson = personDao.CreatePerson(userParam.FirstName, userParam.LastName, newUser.UserId);
-                newAccount = accountDao.CreateAccount(newPerson.Id);
+                //create a user
+                newUser = userDao.CreateUser(userParam.Username, userParam.Password, userParam.FirstName, userParam.LastName);
+                //create account for new user
+                newAccount = accountDao.CreateAccount(newUser.UserId);
             }
             catch (DaoException)
             {
@@ -99,7 +97,7 @@ namespace TEBucksServer.Controllers
             if (newUser != null)
             {
                 // Create a ReturnUser object to return to the client
-                ReturnUser returnUser = new ReturnUser() { User = newUser };
+                ReturnUser returnUser = new ReturnUser() { User = newUser};
 
                 result = Created("/login", returnUser);
             }

@@ -1,15 +1,21 @@
 ﻿using System.Collections.Generic;
+using System.Data.SqlClient;
+using TEBucksServer.DTO;
 using TEBucksServer.Models;
 
 namespace TEBucksServer.DAO
 {
     public interface ITransferDao
     {
-        public Transfer GetTransferById(int transferId);
-        public List<TransferDto> GetTransfersByPersonId(int userId);
-        public List<Transfer> GetAllTransfersByTypeAndPersonId(int personId, string transferType);
-        public List<Transfer> GetAllTransfersByStatusAndPersonId(int personId, string tranferStatus);
-        public TransferDto CreateTransfer(Transfer incoming);
+        public Transfer CreateTransfer(NewTransferDto incoming);
         public Transfer EditTransferStatus(TransferStatusUpdateDto status, int id);
+        public List<Transfer> GetAllTransfersByStatus(string transferStatus);
+        public List<Transfer> GetAllTransfersByType(string transferType);
+        public List<Transfer> GetTransferByUserFromId(int userId);
+        public List<Transfer> GetTransferByUserToId(int userId);
+        public Transfer GetTransferByTransferId(int transferId);
+        public List<Transfer> GetTransfersByUserName(string userName);
+        public TempTransfer MapRowToTransfer(SqlDataReader reader);
+
     }
 }
