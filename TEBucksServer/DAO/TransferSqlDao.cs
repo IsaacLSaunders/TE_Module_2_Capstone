@@ -15,6 +15,7 @@ namespace TEBucksServer.DAO
     {
         private readonly string ConnectionString;
         private readonly IUserDao UserDao;
+        private readonly IAccountDao AccountDao;
 
 
 
@@ -22,6 +23,7 @@ namespace TEBucksServer.DAO
         {
             ConnectionString = connectionString;
             UserDao = new UserSqlDao(connectionString);
+            AccountDao = new AccountSqlDao(connectionString);
         }
 
         public TransferSqlDao() { }
@@ -52,6 +54,13 @@ namespace TEBucksServer.DAO
                     newId = Convert.ToInt32(cmd.ExecuteScalar());
 
                     output = GetTransferByTransferId(newId);
+
+                    if(output.TransferType == "Send")
+                    {
+                        //increment and decrement balance here based on transfer type == 'Send'
+                        AccountDao.IncrementBalance(output);
+                        AccountDao.DecrementBalance(output);
+                    }
                 }
             }
             catch (SqlException ex)
@@ -84,11 +93,17 @@ namespace TEBucksServer.DAO
                     idActual = Convert.ToInt32(cmd.ExecuteScalar());
 
                     output = GetTransferByTransferId(idActual);
+
+                    if(output.TransferStatus == "Approved")
+                    {
+                        //increment and decrement balance here based on transfer status == 'Approved'
+                        AccountDao.IncrementBalance(output);
+                        AccountDao.DecrementBalance(output);
+                    }
                 }
             }
             catch (SqlException ex)
             {
-
                 throw new DaoException("Sql exception ocurred", ex);
             }
             return output;
