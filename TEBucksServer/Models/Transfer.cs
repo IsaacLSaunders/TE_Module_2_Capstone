@@ -12,4 +12,14 @@ namespace TEBucksServer.Models
         public string TransferStatus { get; set; }
         public decimal Amount { get; set; }
     }
+
+    public class TempTransfer
+    {
+        public int TransferId { get; set; }
+        public int UserFrom { get; set; }
+        public int UserTo { get; set; }
+        public string TransferType { get; set; }
+        public string TransferStatus { get; set; }
+        public decimal Amount { get; set; }
+    }
 }

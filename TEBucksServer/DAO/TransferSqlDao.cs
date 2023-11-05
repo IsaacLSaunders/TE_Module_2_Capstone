@@ -110,7 +110,7 @@ namespace TEBucksServer.DAO
 
                     while (reader.Read())
                     {
-                        output.Add(MapRowToTransfer(reader));
+                        output.Add(ConvertTempTransfer(MapRowToTransfer(reader)));
                     }
 
                 }
@@ -140,7 +140,7 @@ namespace TEBucksServer.DAO
 
                     while (reader.Read())
                     {
-                        output.Add(MapRowToTransfer(reader));
+                        output.Add(ConvertTempTransfer(MapRowToTransfer(reader)));
                     }
 
                 }
@@ -171,7 +171,7 @@ namespace TEBucksServer.DAO
 
                     while (reader.Read())
                     {
-                        output.Add(MapRowToTransfer(reader));
+                        output.Add(ConvertTempTransfer(MapRowToTransfer(reader)));
                     }
                 }
             }
@@ -201,7 +201,7 @@ namespace TEBucksServer.DAO
 
                     while (reader.Read())
                     {
-                        output.Add(MapRowToTransfer(reader));
+                        output.Add(ConvertTempTransfer(MapRowToTransfer(reader)));
                     }
                 }
             }
@@ -213,15 +213,14 @@ namespace TEBucksServer.DAO
             return output;
         }
 
+        //TODO fix sql query or MapRowToTransfer, issue coming from one of the two
         public Transfer GetTransferByTransferId (int transferId)
         {
             Transfer output = null;
+            TempTransfer temp = null;
 
-            string sql = "SELECT transferId, fromId.user_id, fromId.firstname, fromId.lastname, fromId.username, fromId.password_hash, fromId.salt, " +
-                "toID.user_id, toID.firstname, toID.lastname, toID.username, toID.password_hash, toID.salt, transferType, transferStatus, amount " +
+            string sql = "SELECT transferId, userFrom, userTo, transferType, transferStatus, amount " +
                 "FROM transfers " +
-                "JOIN users AS fromId ON transfers.userFrom = fromId.user_id " +
-                "JOIN users AS toID ON transfers.userTo = toID.user_id " +
                 "WHERE transferId = @transferId;";
 
             try
@@ -236,8 +235,11 @@ namespace TEBucksServer.DAO
 
                     if (reader.Read())
                     {
-                        output = MapRowToTransfer(reader);
+                        temp = MapRowToTransfer(reader);
                     }
+
+                    output = ConvertTempTransfer(temp);
+
                 }
             }
             catch (SqlException ex)
@@ -274,16 +276,30 @@ namespace TEBucksServer.DAO
             return output;
         }
 
-        public Transfer MapRowToTransfer(SqlDataReader reader)
+        public TempTransfer MapRowToTransfer(SqlDataReader reader)
         {
-            Transfer output = new Transfer();
+            TempTransfer output = new TempTransfer();
 
             output.TransferId = Convert.ToInt32(reader["transferId"]);
-            output.UserFrom = UserDao.MapRowToUser(reader);
-            output.UserTo = UserDao.MapRowToUser(reader);
+            output.UserFrom = Convert.ToInt32(reader["userFrom"]);
+            output.UserTo = Convert.ToInt32(reader["userTo"]);
             output.TransferType = Convert.ToString(reader["transferType"]);
             output.TransferStatus = Convert.ToString(reader["transferStatus"]);
             output.Amount = Convert.ToDecimal(reader["amount"]);
+
+            return output;
+        }
+
+        public Transfer ConvertTempTransfer(TempTransfer temp)
+        {
+            Transfer output = new Transfer();
+
+            output.TransferId = temp.TransferId;
+            output.UserFrom = UserDao.GetUserById(temp.UserFrom);
+            output.UserTo = UserDao.GetUserById(temp.UserTo);
+            output.TransferType = temp.TransferType;
+            output.TransferStatus = temp.TransferStatus;
+            output.Amount = temp.Amount;
 
             return output;
         }

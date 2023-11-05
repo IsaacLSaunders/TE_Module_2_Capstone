@@ -6,9 +6,8 @@ using TEBucksServer.Models;
 
 namespace TEBucksServer.Controllers
 {
-    [Route("api/account")]
+    [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class AccountController : Controller
     {
         private readonly IAccountDao AccountDao;

@@ -15,7 +15,7 @@ namespace TEBucksServer.DAO
         public List<Transfer> GetTransferByUserToId(int userId);
         public Transfer GetTransferByTransferId(int transferId);
         public List<Transfer> GetTransfersByUserName(string userName);
-        public Transfer MapRowToTransfer(SqlDataReader reader);
+        public TempTransfer MapRowToTransfer(SqlDataReader reader);
 
     }
 }
