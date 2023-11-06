@@ -79,7 +79,8 @@ namespace TeBucksServer.Tests.DAO
         public void CreateUser_HappyPath()
         {
 
-            //NOT SURE IF THIS IS TESTABLE BECAUSE THE HASH AND SALT WILL ALWAYS CHANGE
+            //NOT SURE IF THIS IS TESTABLE WITHOUT REMOVING THE HASH AND SALT FROM THE TEST
+                //THE HASH AND SALT WILL ALWAYS CHANGE
             User actual = dao.CreateUser("james", "james", "james", "james");
             AssertUsersCreatedMatch(testUser, actual);
         }
