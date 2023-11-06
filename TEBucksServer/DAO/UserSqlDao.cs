@@ -23,7 +23,7 @@ namespace TEBucksServer.DAO
         {
             User user = null;
 
-            string sql = "SELECT user_id, username, firstname, lastname, password_hash, salt FROM users WHERE user_id = @user_id";
+            string sql = "SELECT user_id, firstname, lastname, username, password_hash, salt FROM users WHERE user_id = @user_id";
 
             try
             {
@@ -53,7 +53,7 @@ namespace TEBucksServer.DAO
         {
             User user = null;
 
-            string sql = "SELECT user_id, username, firstname, lastname, password_hash, salt FROM users WHERE username = @username";
+            string sql = "SELECT user_id, firstname, lastname, username, password_hash, salt FROM users WHERE username = @username";
 
             try
             {
@@ -83,7 +83,7 @@ namespace TEBucksServer.DAO
         {
             List<User> users = new List<User>();
 
-            string sql = "SELECT user_id, username, firstname, lastname, password_hash, salt FROM users";
+            string sql = "SELECT user_id, firstname, lastname, username, password_hash, salt FROM users";
 
             try
             {
