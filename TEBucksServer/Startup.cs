@@ -10,7 +10,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TEBucksServer.DAO;
+using TEBucksServer.NewFolder;
 using TEBucksServer.Security;
+using TEBucksServer.Services;
 
 namespace TEBucksServer
 {
@@ -59,6 +61,7 @@ namespace TEBucksServer
             services.AddTransient<IUserDao>(sp => new UserSqlDao(connectionString));
             services.AddTransient<IAccountDao>(sp => new AccountSqlDao(connectionString));
             services.AddTransient<ITransferDao>(sp => new TransferSqlDao(connectionString));
+            services.AddTransient<ITearsLog>(sp => new TEARSLoggerApiService("https://tears.azurewebsites.net/"));
 
             // Swagger Documentation
             services.AddSwaggerGen(s =>
