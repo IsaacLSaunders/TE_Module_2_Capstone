@@ -9,8 +9,6 @@ namespace TEBucksServer.DAO
     {
         public Transfer CreateTransfer(NewTransferDto incoming);
         public Transfer EditTransferStatus(TransferStatusUpdateDto status, int id);
-        public List<Transfer> GetAllTransfersByStatus(string transferStatus);
-        public List<Transfer> GetAllTransfersByType(string transferType);
         public List<Transfer> GetTransferByUserFromId(int userId);
         public List<Transfer> GetTransferByUserToId(int userId);
         public Transfer GetTransferByTransferId(int transferId);

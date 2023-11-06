@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using TEBucksServer.DAO;
 using TEBucksServer.DTO;
 using TEBucksServer.Models;
+using TEBucksServer.NewFolder;
+using TEBucksServer.Services;
 
 namespace TEBucksServer.Controllers
 {
@@ -17,12 +19,14 @@ namespace TEBucksServer.Controllers
         private readonly IAccountDao AccountDao;
         private readonly IUserDao UserDao;
         private readonly ITransferDao TransferDao;
+        private readonly ITearsLog TearsLog;
 
-        public TransfersController(IAccountDao accountDao, IUserDao userDao, ITransferDao transferDao)
+        public TransfersController(IAccountDao accountDao, IUserDao userDao, ITransferDao transferDao, ITearsLog tearsLog)
         {
             AccountDao = accountDao;
             UserDao = userDao;
             TransferDao = transferDao;
+            TearsLog = tearsLog;
         }
 
         //get an individual transfer
@@ -43,7 +47,7 @@ namespace TEBucksServer.Controllers
         [HttpPost]
         public ActionResult<Transfer> CreateTransfer(NewTransferDto incoming)
         {
-            
+
             if (!ValidateTransfer(incoming))
             {
                 return BadRequest();
@@ -60,7 +64,7 @@ namespace TEBucksServer.Controllers
             }
         }
 
-        //TODO approve and reject transfer http put with transfer status update DTO
+        //approve and reject transfer http put with transfer status update DTO
         [HttpPut("{id}/status")]
         public ActionResult<Transfer> ApproveOrRejectTransfer(TransferStatusUpdateDto status, int id)
         {
@@ -76,6 +80,7 @@ namespace TEBucksServer.Controllers
                 }
 
                 Transfer output = TransferDao.EditTransferStatus(status, id);
+                
                 return Ok(output);
 
             }
@@ -87,12 +92,10 @@ namespace TEBucksServer.Controllers
         }
 
 
-        //VALIDATE A TRANSFER what should this return?
-                //TODO THIS COULD BE WHERE THE LOGGER GOES
         private bool ValidateTransfer(NewTransferDto incoming)
         {
             //can't send money to yourself
-            if(incoming.userTo == incoming.userFrom)
+            if (incoming.userTo == incoming.userFrom)
             {
                 return false;
             }
@@ -103,13 +106,15 @@ namespace TEBucksServer.Controllers
                 return false;
             }
 
+            //Only run the log once we have validated that the transfer is positive and its going to and from different users
+            PrepAndExeTearsLog(incoming);
 
             //can't send more than what's in the account
             try
             {
-                Account from = AccountDao.GetAccountByUserId(incoming.userFrom);
+                Account acntFrom = AccountDao.GetAccountByUserId(incoming.userFrom);
 
-                if(from.Balance < incoming.amount)
+                if(acntFrom.Balance < incoming.amount)
                 {
                     return false;
                 }
@@ -122,6 +127,29 @@ namespace TEBucksServer.Controllers
 
 
             return true;
+        }
+
+        private void PrepAndExeTearsLog(NewTransferDto incomingTransferDto)
+        {
+                User from = UserDao.GetUserById(incomingTransferDto.userFrom);
+                User to = UserDao.GetUserById(incomingTransferDto.userTo);
+                Account acntFrom = AccountDao.GetAccountByUserId(from.UserId);
+                    //check if the amount is larger than $1000
+                string description = incomingTransferDto.amount >= 1000.00M ? "Transaction Over $1000.00. || " : "";
+
+                TEARSLogModel log = new TEARSLogModel();
+
+                log.amount = incomingTransferDto.amount;
+                log.username_from = from.Username;
+                log.username_to = to.Username;
+
+                    //check if the balance is less than the requested/sent transfer amount
+                if(acntFrom.Balance < incomingTransferDto.amount)
+                {
+                    log.description = description + $"{incomingTransferDto.transferType} || Overdraft";
+                    TearsLog.Log(log);
+                }
+
         }
     }
 }

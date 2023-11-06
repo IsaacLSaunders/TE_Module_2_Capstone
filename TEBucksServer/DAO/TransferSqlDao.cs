@@ -109,66 +109,6 @@ namespace TEBucksServer.DAO
             return output;
         }
 
-        public List<Transfer> GetAllTransfersByStatus(string transferStatus)
-        {
-            List<Transfer> output = new List<Transfer>();
-            string sql = "SELECT transferId, transferType, transferStatus, userFrom, userTo, amount FROM transfers WHERE transferStatus = @transferStatus;";
-
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(ConnectionString))
-                {
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@transferStatus", transferStatus);
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        output.Add(ConvertTempTransfer(MapRowToTransfer(reader)));
-                    }
-
-                }
-            }
-            catch (SqlException ex)
-            {
-
-                throw new DaoException("Sql exception ocurred", ex);
-            }
-            return output;
-        }
-
-        public List<Transfer> GetAllTransfersByType(string transferType)
-        {
-            List<Transfer> output = new List<Transfer>();
-            string sql = "SELECT transferId, transferType, transferStatus, userFrom, userTo, amount FROM transfers WHERE transferType = @transferType;";
-
-            try
-            {
-                using (SqlConnection conn = new SqlConnection(ConnectionString))
-                {
-                    conn.Open();
-                    SqlCommand cmd = new SqlCommand(sql, conn);
-                    cmd.Parameters.AddWithValue("@transferType", transferType);
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
-                    {
-                        output.Add(ConvertTempTransfer(MapRowToTransfer(reader)));
-                    }
-
-                }
-            }
-            catch (SqlException ex)
-            {
-
-                throw new DaoException("Sql exception ocurred", ex);
-            }
-            return output;
-        }
-
         public List<Transfer> GetTransferByUserFromId(int userId)
         {
             List<Transfer> output = new List<Transfer>();
@@ -229,7 +169,6 @@ namespace TEBucksServer.DAO
             return output;
         }
 
-        //TODO fix sql query or MapRowToTransfer, issue coming from one of the two
         public Transfer GetTransferByTransferId (int transferId)
         {
             Transfer output = null;
@@ -265,8 +204,6 @@ namespace TEBucksServer.DAO
 
             return output;
         }
-
-
 
         public List<Transfer> GetTransfersByUserName(string userName)
         {
